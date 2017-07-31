@@ -23,6 +23,14 @@ cdef int to_int(bytes s):
     return fast_atoi(s)
 
 
+cdef long prod(long[:] mv):
+    cdef int i, n
+    cdef long res = 1
+    n = mv.shape[0]
+    for i in range(n):
+        res *= mv[i]
+    return res
+
 to_type = {
     "string" : lambda x: x.strip() if x is not None else "",
     "int" : to_int,
@@ -76,10 +84,56 @@ def parse_array(el, name):
         if kid.tag == "field":
             fields.append({"name": kid.text, "type": kid.attrib.get("type", None)})
         if kid.tag == "set":
-            types = [to_type[f["type"]] for f in fields]
-            ifields = len(fields)
-            vals = parse_set(kid, types, ifields)
+            is_float_set = all([f["type"] is None for f in fields])
+            if not is_float_set:
+                types = [to_type[f["type"]] for f in fields]
+                ifields = range(len(fields))
+                vals = parse_general_set(kid, types, ifields)
+            else:
+                nfields = len(fields)
+                # get set dimensions
+                set_dims = get_set_dimension(kid)
+                set_dims.append(nfields)
+                # allocate memory: make one long 1-d array
+                vals = np.zeros(set_dims, dtype=float).reshape(-1)
+                parse_float_set(kid, vals, np.array(set_dims, dtype=int))
+                # reshape values back to their original dimensions
+                vals = vals.reshape(set_dims)
     return {name: {"dimensions": dims, "fields": fields, "values": vals}}
+
+
+def get_set_dimension(el, acc=None):
+    """Get dimensions of a float set"""
+    if acc is None:
+        acc = []
+    if len(el) > 0:
+        acc.append(len(el))
+        get_set_dimension(el[0], acc)
+    return acc
+
+
+cdef void parse_float_set(el, double[:] value, long[:] set_dims, int cur=0):
+    cdef:
+        int i, i_kid, nelem
+    for i_kid, kid in enumerate(el):
+        if kid.tag == "set":   # another set dimension
+            new_dims = set_dims[1:]
+            nelem = prod(new_dims)
+            parse_float_set(kid, value, new_dims, cur+i_kid*nelem)
+        elif kid.tag == "r":    # just row
+            kid_values = kid.text.split()
+            for i in range(set_dims[-1]):
+                value[cur+i] = to_float(kid_values[i])
+            cur += set_dims[-1]
+
+
+def parse_general_set(el, types, ifields):
+    value = []
+    for kid in el:
+        if kid.tag == "rc":   # row and column
+            # split by columns
+            value.append([types[i](kid[i].text) for i in ifields])
+    return value
 
 
 def parse_set(el, types, int ifields):
