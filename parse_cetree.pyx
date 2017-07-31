@@ -6,17 +6,22 @@ from collections import Counter
 #from lxml import etree
 from xml.etree import cElementTree as etree
 
+
 cdef extern from "fast_atoi.h":
     int fast_atoi(char *s)
+
 
 cdef extern from "fast_atof.h":
     double fast_atof(char *s)
 
+
 cdef double to_float(bytes s):
     return fast_atof(s) 
 
+
 cdef int to_int(bytes s):
     return fast_atoi(s)
+
 
 to_type = {
     "string" : lambda x: x.strip() if x is not None else "",
@@ -26,24 +31,29 @@ to_type = {
     "logical": lambda x: x.strip() == "T"
 }
 
+
 def get_name(el):
     if el.tag in ["i", "v", "varray"]:
         return el.attrib.get("name", None)
     else:
         return el.tag + ("" if not "name" in el.attrib else ":" + el.attrib["name"])
 
+
 def dummy(el, name):
     return {get_name(el): None}
+
 
 def  parse_i(el, name):
     e_type = el.attrib.get("type", None)
     value = to_type[e_type](el.text)
     return {name: value}
 
+
 def parse_v(el, name):
     e_type = el.attrib.get("type", None)
     value = [to_type[e_type](v_i) for v_i in el.text.split()]
     return {name: value}
+
 
 def parse_varray(el, name):
     e_type = el.attrib.get("type", None)
@@ -53,6 +63,7 @@ def parse_varray(el, name):
             parsed_kid = parse_v(kid, None)
             value.append(parsed_kid[None])
     return {name: value}
+
 
 def parse_array(el, name):
     # array has dimensions, field names and sets of values
@@ -69,6 +80,7 @@ def parse_array(el, name):
             ifields = len(fields)
             vals = parse_set(kid, types, ifields)
     return {name: {"dimensions": dims, "fields": fields, "values": vals}}
+
 
 def parse_set(el, types, int ifields):
     cdef list value, val_i
@@ -92,9 +104,11 @@ def parse_set(el, types, int ifields):
             value.append(val_i)
     return value
 
+
 def parse_time(el, name):
     value = [float(t) for t in [el.text[:8], el.text[8:]]]
     return {name: value}
+
 
 def parse_entry(e_type):
     def _parse(el, name):
@@ -111,6 +125,7 @@ base_cases = {
     "atoms": parse_entry("int"),
     "types": parse_entry("int"),
 }
+
 
 def parse_etree(dom):
     d = {}

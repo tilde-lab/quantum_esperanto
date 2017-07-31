@@ -5,35 +5,40 @@ import pprint
 import numpy as np
 from datetime import datetime
 from collections import Counter
-#from lxml import etree
+# from lxml import etree
 from xml.etree import cElementTree as etree
 
 to_type = {
-    "string" : lambda x: x.strip() if x is not None else "",
-    "int" : int,
+    "string": lambda x: x.strip() if x is not None else "",
+    "int": int,
     None: float,
     "": float,
     "logical": lambda x: x.strip() == "T"
 }
 
+
 def get_name(el):
     if el.tag in ["i", "v", "varray"]:
         return el.attrib.get("name", None)
     else:
-        return el.tag + ("" if not "name" in el.attrib else ":" + el.attrib["name"])
+        return el.tag + (":" + el.attrib["name"] if "name" in el.attrib else "")
 
-def dummy(el, name):
+
+def dummy(el, _):
     return {get_name(el): None}
 
-def  parse_i(el, name):
+
+def parse_i(el, name):
     e_type = el.attrib.get("type", None)
     value = to_type[e_type](el.text)
     return {name: value}
+
 
 def parse_v(el, name):
     e_type = el.attrib.get("type", None)
     value = [to_type[e_type](v_i) for v_i in el.text.split()]
     return {name: value}
+
 
 def parse_varray(el, name):
     e_type = el.attrib.get("type", None)
@@ -44,10 +49,12 @@ def parse_varray(el, name):
             value.append(parsed_kid[None])
     return {name: value}
 
+
 def parse_array(el, name):
     # array has dimensions, field names and sets of values
     dims = []
     fields = []
+    vals = []
     for kid in el:
         if kid.tag == "dimension":
             dims.append(kid.text)
@@ -64,10 +71,11 @@ def parse_array(el, name):
                 # get set dimensions
                 set_dims = get_set_dimension(kid)
                 set_dims.append(nfields)
-                vals = np.zeros(set_dims,dtype=float).reshape(-1)
+                vals = np.zeros(set_dims, dtype=float).reshape(-1)
                 parse_float_set(kid, nfields, vals, np.array(set_dims))
                 vals = vals.reshape(set_dims)
     return {name: {"dimensions": dims, "fields": fields, "values": vals}}
+
 
 def get_set_dimension(el, acc=None):
     if acc is None:
@@ -77,6 +85,7 @@ def get_set_dimension(el, acc=None):
         get_set_dimension(el[0], acc)
     return acc
 
+
 def parse_float_set(el, nfields, value, set_dims, cur=0):
     for i_kid, kid in enumerate(el):
         if kid.tag == "set":  # another set dimension
@@ -84,10 +93,11 @@ def parse_float_set(el, nfields, value, set_dims, cur=0):
             nelem = new_dims.prod()
             parse_float_set(kid, nfields, value, new_dims, cur+i_kid*nelem)
         elif kid.tag == "r":    # just row
-#            kid_values = kid.text.split()
-#            for i in range(nfields):
-#                value[cur+i] = kid_values[i]
+            # kid_values = kid.text.split()
+            # for i in range(nfields):
+            #     value[cur+i] = kid_values[i]
             cur += nfields
+
 
 def parse_general_set(el, types, ifields):
     value = []
@@ -101,6 +111,7 @@ def parse_general_set(el, types, ifields):
 def parse_time(el, name):
     value = [float(t) for t in [el.text[:8], el.text[8:]]]
     return {name: value}
+
 
 def parse_entry(e_type):
     def _parse(el, name):
@@ -117,6 +128,7 @@ base_cases = {
     "atoms": parse_entry("int"),
     "types": parse_entry("int"),
 }
+
 
 def parse_etree(dom):
     d = {}
