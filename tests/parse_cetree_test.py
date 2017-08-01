@@ -16,4 +16,4 @@ if __name__ == "__main__":
     d = parse_file(f_name)
     finish = datetime.now()
     print "Time elapsed: {}".format(finish - start)
-    #pprint.pprint(d)
+    # pprint.pprint(d)
