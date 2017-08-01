@@ -1,9 +1,6 @@
-import sys
-import pprint
 import numpy as np
-from datetime import datetime
 from collections import Counter
-#from lxml import etree
+# from lxml import etree
 from xml.etree import cElementTree as etree
 
 
@@ -136,29 +133,6 @@ def parse_general_set(el, types, ifields):
     return value
 
 
-def parse_set(el, types, int ifields):
-    cdef list value, val_i
-    cdef int i
-    value = []
-    
-    for kid in el:
-        if kid.tag == "set":  # another set dimension
-            value.append(parse_set(kid, types, ifields))
-        elif kid.tag == "rc":   # row and column
-            val_i = []
-            # split by columns
-            for i in range(ifields):
-                val_i.append(types[i](kid[i].text))
-            value.append(val_i)
-        elif kid.tag == "r":    # just row
-            val_i = []
-            kid_values = kid.text.split()
-            for i in range(ifields):
-                val_i.append(types[i](kid_values[i]))
-            value.append(val_i)
-    return value
-
-
 def parse_time(el, name):
     value = [float(t) for t in [el.text[:8], el.text[8:]]]
     return {name: value}
@@ -216,17 +190,3 @@ def parse_etree(dom):
 def parse_file(f_name):
     tree = etree.parse(f_name)
     return parse_etree(tree.getroot())
-
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        f_name = "set.xml"
-    else:
-        f_name = sys.argv[1]
-
-    start = datetime.now()
-    d = parse_file(f_name)
-    finish = datetime.now()
-    print "Time elapsed: {}".format(finish - start)
-    # pprint.pprint(d['modeling']['eigenvalues']['array']['values'], width=150)
-    print np.array(d['modeling']['eigenvalues']['array']['values']).shape
