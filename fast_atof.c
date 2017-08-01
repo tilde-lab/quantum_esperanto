@@ -10,6 +10,7 @@
 // 09-May-2009 Tom Van Baak (tvb) www.LeapSecond.com
 //
 
+#include <math.h>
 #define white_space(c) ((c) == ' ' || (c) == '\t')
 #define valid_digit(c) ((c) >= '0' && (c) <= '9')
 
@@ -22,6 +23,12 @@ double fast_atof (const char *p)
 
     while (white_space(*p) ) {
         p += 1;
+    }
+
+    // Account for FORTRAN string overflow
+
+    if (*p == '*') {
+        return NAN;
     }
 
     // Get sign, if any.

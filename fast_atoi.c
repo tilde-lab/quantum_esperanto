@@ -1,4 +1,4 @@
-
+#include <math.h>
 #define white_space(c) ((c) == ' ' || (c) == '\t')
 #define valid_digit(c) ((c) >= '0' && (c) <= '9')
 
@@ -8,6 +8,11 @@ int fast_atoi(const char* p)
     // Skip leading whitespace
     while (white_space(*p)) {
         p += 1;
+    }
+
+    // Account for FORTRAN string overflow
+    if (*p == '*') {
+        return NAN;
     }
 
     for (value = 0.0; valid_digit(*p); p += 1) {
