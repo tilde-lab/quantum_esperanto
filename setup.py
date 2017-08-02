@@ -12,6 +12,7 @@ setup(
     name='DFTXMLParser',
     version='0.1',
     author='Andrey Sobolev',
+    license='MIT',
     ext_modules=cythonize([vasp]),
     packages=['DFTXMLParser'],
 )
