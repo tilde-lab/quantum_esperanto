@@ -1,3 +1,5 @@
+# cython: c_string_type=str, c_string_encoding=ascii
+
 import numpy as np
 from collections import Counter
 # from lxml import etree
@@ -12,12 +14,14 @@ cdef extern from "fast_atof.h":
     double fast_atof(char *s)
 
 
-cdef double to_float(bytes s):
-    return fast_atof(s) 
+cdef double to_float(s):
+    cdef char* f = s
+    return fast_atof(f) 
 
 
-cdef int to_int(bytes s):
-    return fast_atoi(s)
+cdef int to_int(s):
+    cdef char* i = s
+    return fast_atoi(i)
 
 
 cdef long prod(long[:] mv):
