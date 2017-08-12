@@ -2,8 +2,8 @@
 
 import numpy as np
 from collections import Counter
-# from lxml import etree
-from xml.etree import cElementTree as etree
+from lxml import etree
+# from xml.etree import cElementTree as etree
 
 
 cdef extern from "fast_atoi.h":
@@ -97,7 +97,9 @@ def parse_array(el, name):
                 set_dims.append(nfields)
                 # allocate memory: make one long 1-d array
                 vals = np.zeros(set_dims, dtype=float).reshape(-1)
-                parse_float_set(kid, vals, np.array(set_dims, dtype=int))
+                cols = get_cols(kid)
+
+                parse_float_set(kid, vals, np.array(set_dims, dtype=int), np.array(cols, dtype=int))
                 # reshape values back to their original dimensions
                 vals = vals.reshape(set_dims)
     return {name: {"dimensions": dims, "fields": fields, "values": vals}}
@@ -112,8 +114,23 @@ def get_set_dimension(el, acc=None):
         get_set_dimension(el[0], acc)
     return acc
 
+def get_cols(el):
+    if len(el) > 0:
+        return get_cols(el[0])
+    else:
+        return string_split(el.text)
 
-cdef void parse_float_set(el, double[:] value, long[:] set_dims, int cur=0):
+def string_split(s):
+    """Get borders for string split"""
+    res = [0]
+    for i in range(len(s) - 1):
+        if s[i] != " " and s[i+1] == " ":
+            res.append(i+1)
+    if s[-1] != " ":
+        res.append(len(s))
+    return res
+
+cdef void parse_float_set(el, double[:] value, long[:] set_dims, long[:] cols, int cur=0):
     cdef:
         int i, i_kid, nelem
     for i_kid in range(set_dims[0]):
@@ -121,11 +138,11 @@ cdef void parse_float_set(el, double[:] value, long[:] set_dims, int cur=0):
         if kid.tag == "set":   # another set dimension
             new_dims = set_dims[1:]
             nelem = prod(new_dims)
-            parse_float_set(kid, value, new_dims, cur+i_kid*nelem)
+            parse_float_set(kid, value, new_dims, cols, cur+i_kid*nelem)
         elif kid.tag == "r":    # just row
-            kid_values = kid.text.split()
+            text = kid.text
             for i in range(set_dims[-1]):
-                value[cur+i] = to_float(kid_values[i])
+                value[cur+i] = fast_atof(text[cols[i]:cols[i+1]])
             cur += set_dims[-1]
 
 
