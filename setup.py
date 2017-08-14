@@ -1,18 +1,40 @@
-from distutils.core import setup, Extension
-from Cython.Build import cythonize
+try:
+    from setuptools import setup, Extension
+except ImportError:
+    from distutils.core import setup, Extension
+
+# check if we have Cython available
+try:
+    from Cython.Build import cythonize
+    use_cython = True
+except ImportError:
+    use_cython = False
 
 # vasp extension
-vasp = Extension("DFTXMLParser.vasp",
+sources = [
+    "src/fast_atoi.c",
+    "src/fast_atof.c"]
+if use_cython:
+    sources.append("src/vasp.pyx")
+else:
+    sources.append("src/vasp.c")
+
+vasp_ext = Extension("DFTXMLParser.vasp",
                 include_dirs=['include'],
-                sources=["src/vasp.pyx", 
-                         "src/fast_atoi.c", 
-                         "src/fast_atof.c"])
+                sources=sources)
+
+if use_cython:
+    exts = cythonize([vasp_ext])
+else:
+    exts = [vasp_ext]
 
 setup(
     name='DFTXMLParser',
     version='0.1',
     author='Andrey Sobolev',
     license='MIT',
-    ext_modules=cythonize([vasp]),
+    ext_modules=exts,
     packages=['DFTXMLParser'],
+    install_requires=['numpy>=1.10', 'lxml'],
+    develop_requires=['Cython'],
 )

@@ -1,9 +1,9 @@
-# cython: c_string_type=str, c_string_encoding=ascii
+# cython: c_string_type=str, c_string_encoding=ascii, profile=True
 
 import numpy as np
 from collections import Counter
-from lxml import etree
-# from xml.etree import cElementTree as etree
+#from lxml import etree
+from xml.etree import cElementTree as etree
 
 
 cdef extern from "fast_atoi.h":
