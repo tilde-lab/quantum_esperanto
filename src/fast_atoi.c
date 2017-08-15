@@ -4,7 +4,7 @@
 
 int fast_atoi(const char* p)
 {
-    int value = 0;
+    int value = 0, sign = 1;
     // Skip leading whitespace
     while (white_space(*p)) {
         p += 1;
@@ -15,9 +15,15 @@ int fast_atoi(const char* p)
         return INT_MAX;
     }
 
+    // Account for sign
+    if (*p == '-') {
+        sign = -1;
+        p += 1;
+    }
+
     for (value = 0.0; valid_digit(*p); p += 1) {
         value = value * 10.0 + (*p - '0');
     }
 
-    return value;
+    return sign * value;
 }
