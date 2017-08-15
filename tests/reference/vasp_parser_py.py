@@ -1,57 +1,70 @@
-#!/usr/bin/env python
+"""
+A pure pythonic reference version of vasp xml output parser. Pretty slow.
+"""
 
-import sys
-import pprint
-import numpy as np
-from datetime import datetime
 from collections import Counter
-# from lxml import etree
-from xml.etree import cElementTree as etree
+from xml.etree import cElementTree as eTree
+
 
 to_type = {
     "string": lambda x: x.strip() if x is not None else "",
     "int": int,
     None: float,
     "": float,
-    "logical": lambda x: x.strip() == "T"
+    "logical": lambda x: x.strip() in ["T"]
 }
 
 
 def get_name(el):
+    """
+    Finds the name of an ElementTree element (name for i,v,varray tags; tag:name for other tags)
+    :param el: an Element instance
+    :return: name string
+    """
     if el.tag in ["i", "v", "varray"]:
         return el.attrib.get("name", None)
     else:
-        return el.tag + (":" + el.attrib["name"] if "name" in el.attrib else "")
+        return el.tag + ("" if "name" not in el.attrib else ":" + el.attrib["name"])
 
 
-def dummy(el, _):
-    return {get_name(el): None}
-
-
-def parse_i(el, name):
+def parse_i(el):
+    """
+    i Element parser
+    :param el: Element with i tag
+    :return: name to value dictionary
+    """
+    name = get_name(el)
     e_type = el.attrib.get("type", None)
     value = to_type[e_type](el.text)
     return {name: value}
 
 
-def parse_v(el, name):
+def parse_v(el):
+    """
+    v Element parser
+    :param el: Element with v tag
+    :return: name to value dictionary
+    """
+    name = get_name(el)
     e_type = el.attrib.get("type", None)
     value = [to_type[e_type](v_i) for v_i in el.text.split()]
     return {name: value}
 
 
-def parse_varray(el, name):
-    e_type = el.attrib.get("type", None)
+def parse_varray(el):
+    name = get_name(el)
+    # varrays are float
     value = []
     for kid in el:
         if kid.tag == "v":
-            parsed_kid = parse_v(kid, None)
+            parsed_kid = parse_v(kid)
             value.append(parsed_kid[None])
     return {name: value}
 
 
-def parse_array(el, name):
+def parse_array(el):
     # array has dimensions, field names and sets of values
+    name = get_name(el)
     dims = []
     fields = []
     vals = []
@@ -61,61 +74,33 @@ def parse_array(el, name):
         if kid.tag == "field":
             fields.append({"name": kid.text, "type": kid.attrib.get("type", None)})
         if kid.tag == "set":
-            is_float_set = all([f["type"] is None for f in fields])
-            if not is_float_set:
-                types = [to_type[f["type"]] for f in fields]
-                ifields = range(len(fields))
-                vals = parse_general_set(kid, types, ifields)
-            else:
-                nfields = len(fields)
-                # get set dimensions
-                set_dims = get_set_dimension(kid)
-                set_dims.append(nfields)
-                vals = np.zeros(set_dims, dtype=float).reshape(-1)
-                parse_float_set(kid, nfields, vals, np.array(set_dims))
-                vals = vals.reshape(set_dims)
+            vals = parse_set(kid, dims, fields)
     return {name: {"dimensions": dims, "fields": fields, "values": vals}}
 
 
-def get_set_dimension(el, acc=None):
-    if acc is None:
-        acc = []
-    if len(el) > 0:
-        acc.append(len(el))
-        get_set_dimension(el[0], acc)
-    return acc
-
-
-def parse_float_set(el, nfields, value, set_dims, cur=0):
-    for i_kid, kid in enumerate(el):
-        if kid.tag == "set":  # another set dimension
-            new_dims = set_dims[1:]
-            nelem = new_dims.prod()
-            parse_float_set(kid, nfields, value, new_dims, cur+i_kid*nelem)
-        elif kid.tag == "r":    # just row
-            # kid_values = kid.text.split()
-            # for i in range(nfields):
-            #     value[cur+i] = kid_values[i]
-            cur += nfields
-
-
-def parse_general_set(el, types, ifields):
+def parse_set(el, dims, fields):
     value = []
     for kid in el:
+        if kid.tag == "set":  # another set dimension
+            value.append(parse_set(kid, dims, fields))
         if kid.tag == "rc":   # row and column
             # split by columns
-            value.append([types[i](kid[i].text) for i in ifields])
+            value.append([to_type[f["type"]](c.text) for (f, c) 
+                          in zip(fields, kid) if c.tag == "c"])
+        if kid.tag == "r":    # just row
+            value.append([to_type[f["type"]](c) for (f, c) in zip(fields, kid.text.split())])
     return value
 
 
-def parse_time(el, name):
+def parse_time(el):
+    name = get_name(el)
     value = [float(t) for t in [el.text[:8], el.text[8:]]]
     return {name: value}
 
 
 def parse_entry(e_type):
-    def _parse(el, name):
-        return {name: to_type[e_type](el.text)}
+    def _parse(el):
+        return {el.tag: to_type[e_type](el.text)}
     return _parse
 
 
@@ -135,7 +120,7 @@ def parse_etree(dom):
     # get our name
     name = get_name(dom)
     # check for base cases
-    parsed = base_cases.get(dom.tag, lambda _, __: None)(dom, name)
+    parsed = base_cases.get(dom.tag, lambda _: None)(dom)
     if parsed is not None:
         # we are in base case
         d.update(parsed)
@@ -163,19 +148,5 @@ def parse_etree(dom):
 
 
 def parse_file(f_name):
-    tree = etree.parse(f_name)
+    tree = eTree.parse(f_name)
     return parse_etree(tree.getroot())
-
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        f_name = "set.xml"
-    else:
-        f_name = sys.argv[1]
-
-    start = datetime.now()
-    d = parse_file(f_name)
-    finish = datetime.now()
-    print "Time elapsed: {}".format(finish - start)
-    # pprint.pprint(d['modeling']['eigenvalues']['array']['values'], width=150)
-    # print np.array(d['modeling']['eigenvalues']['array']['values']).flatten().reshape(1,20,12,2)
