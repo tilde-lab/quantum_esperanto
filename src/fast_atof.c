@@ -8,6 +8,7 @@
 // - Follows atof() precedent of essentially no error checking.
 //
 // 09-May-2009 Tom Van Baak (tvb) www.LeapSecond.com
+// 01-Aug-2017 Modified by Andrey Sobolev
 //
 
 #include <math.h>

@@ -52,7 +52,7 @@ def dummy(el, name):
     return {get_name(el): None}
 
 
-def  parse_i(el, name):
+def parse_i(el, name):
     e_type = el.attrib.get("type", None)
     value = to_type[e_type](el.text)
     return {name: value}
@@ -66,12 +66,34 @@ def parse_v(el, name):
 
 def parse_varray(el, name):
     e_type = el.attrib.get("type", None)
+    if e_type is not None:
+        return parse_general_varray(el, name)
+    else:
+        # fast parsing of float varray
+        dims = np.array([len(el), len(el[0].text.split())])
+        # allocate memory
+        value = np.zeros(dims, dtype=float).reshape(-1)
+        cols = np.array(get_cols(el))
+        parse_float_varray(el, value, dims, cols)
+        return {name: value.reshape(dims)}
+
+
+def parse_general_varray(el, name):
     value = []
     for kid in el:
-        if kid.tag == "v":
-            parsed_kid = parse_v(kid, None)
-            value.append(parsed_kid[None])
+        parsed_kid = parse_v(kid, None)
+        value.append(parsed_kid[None])
     return {name: value}
+
+
+cdef void parse_float_varray(el, double[:] value, long[:] dims, long[:] cols):
+    cdef:
+        int i, j, pos = 0
+    for i in range(dims[0]):
+        text = el[i].text
+        for j in range(dims[1]):
+            value[pos] = fast_atof(text[cols[j]:cols[j+1]])
+            pos += 1
 
 
 def parse_array(el, name):
@@ -142,8 +164,8 @@ cdef void parse_float_set(el, double[:] value, long[:] set_dims, long[:] cols, i
         elif kid.tag == "r":    # just row
             text = kid.text
             for i in range(set_dims[-1]):
-                value[cur+i] = fast_atof(text[cols[i]:cols[i+1]])
-            cur += set_dims[-1]
+                value[cur] = fast_atof(text[cols[i]:cols[i+1]])
+                cur += 1
 
 
 def parse_general_set(el, types, ifields):
