@@ -33,8 +33,9 @@ setup(
     version='0.1',
     author='Andrey Sobolev',
     license='MIT',
+    description="A fast parser of XML files output by VASP DFT code written in Cython.",
     ext_modules=exts,
     packages=['DFTXMLParser'],
     install_requires=['numpy>=1.10', 'lxml'],
-    develop_requires=['Cython'],
+    extras_require={'dev': ['Cython']},
 )
