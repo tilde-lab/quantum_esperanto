@@ -1,7 +1,4 @@
-try:
-    from setuptools import setup, Extension
-except ImportError:
-    from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 # check if we have Cython available
 try:
@@ -37,5 +34,7 @@ setup(
     ext_modules=exts,
     packages=['DFTXMLParser'],
     install_requires=['numpy>=1.10', 'lxml'],
-    extras_require={'dev': ['Cython']},
+    extras_require={'dev': ['Cython', 'nose']},
+    tests_require=['nose'],
+    test_suite='nose.collector'
 )
