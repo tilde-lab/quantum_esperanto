@@ -9,7 +9,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 from nose.tools import ok_, eq_
 from reference.vasp_parser_py import parse_file as parse_file_ref
-from DFTXMLParser.vasp import parse_file
+from DFTXMLParser.vasp import VaspParser
 
 # float tolerance
 tol = 1e-7
@@ -27,7 +27,7 @@ def test_parser():
 def check_parsing_results(f_name):
     # get our result and reference
     ref_result = parse_file_ref(f_name)
-    result = parse_file(f_name)
+    result = VaspParser().parse_file(f_name)
     # recursive function where all comparison takes place
     compare_dicts(result, ref_result)
 

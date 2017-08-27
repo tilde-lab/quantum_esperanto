@@ -198,38 +198,59 @@ base_cases = {
 }
 
 
-def parse_etree(dom):
-    d = {}
-    # get our name
-    name = get_name(dom)
-    # check for base cases
-    parsed = base_cases.get(dom.tag, lambda _, __: None)(dom, name)
-    if parsed is not None:
-        # we are in base case
-        d.update(parsed)
+
+class VaspParser(object):
+    def __init__(self,
+                 recover=True,
+                 whitelist=None,
+                 blacklist=None):
+        self.recover = recover
+        self.is_whitelist = False
+        self.is_blacklist = False
+        self.whitelist = set()
+        self.blacklist = set()
+        if whitelist is not None:
+            self.is_whitelist = True
+            self.whitelist = set(whitelist)
+        if blacklist is not None:
+            self.is_blacklist = True
+            self.blacklist = set(blacklist)
+
+    def parse_file(self, f_name):
+        tree = etree.parse(f_name)
+        return self._parse_etree(tree.getroot())
+
+    def _parse_etree(self, dom):
+        d = {}
+        # get our name
+        name = get_name(dom)
+        # check for whitelist and blacklist
+        if (self.is_whitelist and name not in self.whitelist) or (self.is_blacklist and name in self.blacklist):
+           return d
+        # check for base cases
+        parsed = base_cases.get(dom.tag, lambda _, __: None)(dom, name)
+        if parsed is not None:
+            # we are in base case
+            d.update(parsed)
+            return d
+        # the rules here are simple: 
+        # 1. update d with all the node attributes (except for name)
+        for k, v in dom.attrib.items():
+            if k != "name": 
+                d[k] = v  # TODO: d[dom.nodeName] should be updated
+
+        # 2. then check all child element nodes
+        children = [el for el in dom]
+        kid_names = [get_name(kid) for kid in children]
+        # 3. if some of the names are identical, put parsed data in a list (eg, scstep)
+        count_kids = Counter(kid_names)
+        d[name] = {kid_name: [] if count_kids[kid_name] > 1 else {} for kid_name in count_kids}
+
+        for (kid_name, kid) in zip(kid_names, children):
+            if count_kids[kid_name] > 1:
+                d[name][kid_name].append(self._parse_etree(kid)[kid_name])
+            else:
+                # 4. if not, put them in a dict
+                d[name].update(self._parse_etree(kid))
         return d
-    # the rules here are simple: 
-    # 1. update d with all the node attributes (except for name)
-    for k, v in dom.attrib.items():
-        if k != "name": 
-            d[k] = v  # TODO: d[dom.nodeName] should be updated
 
-    # 2. then check all child element nodes
-    children = [el for el in dom]
-    kid_names = [get_name(kid) for kid in children]
-    # 3. if some of the names are identical, put parsed data in a list (eg, scstep)
-    count_kids = Counter(kid_names)
-    d[name] = {kid_name: [] if count_kids[kid_name] > 1 else {} for kid_name in count_kids}
-
-    for (kid_name, kid) in zip(kid_names, children):
-        if count_kids[kid_name] > 1:
-            d[name][kid_name].append(parse_etree(kid)[kid_name])
-        else:
-            # 4. if not, put them in a dict
-            d[name].update(parse_etree(kid))
-    return d
-
-
-def parse_file(f_name):
-    tree = etree.parse(f_name)
-    return parse_etree(tree.getroot())

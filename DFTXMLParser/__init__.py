@@ -1,1 +1,1 @@
-from DFTXMLParser.vasp import *
+from DFTXMLParser.vasp import VaspParser
