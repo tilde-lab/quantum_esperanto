@@ -48,10 +48,6 @@ def get_name(el):
         return el.tag + ("" if not "name" in el.attrib else ":" + el.attrib["name"])
 
 
-def dummy(el, name):
-    return {get_name(el): None}
-
-
 def parse_i(el, name):
     e_type = el.attrib.get("type", None)
     value = to_type[e_type](el.text)
@@ -152,6 +148,7 @@ def string_split(s):
         res.append(len(s))
     return res
 
+
 cdef void parse_float_set(el, double[:] value, long[:] set_dims, long[:] cols, int cur=0):
     cdef:
         int i, i_kid, nelem
@@ -202,37 +199,38 @@ base_cases = {
 class VaspParser(object):
     def __init__(self,
                  recover=True,
-                 whitelist=None,
-                 blacklist=None):
+                 whitelist=None):
         self.recover = recover
         self.is_whitelist = False
-        self.is_blacklist = False
         self.whitelist = set()
-        self.blacklist = set()
         if whitelist is not None:
             self.is_whitelist = True
             self.whitelist = set(whitelist)
-        if blacklist is not None:
-            self.is_blacklist = True
-            self.blacklist = set(blacklist)
 
     def parse_file(self, f_name):
+        flag = not self.whitelist
         tree = etree.parse(f_name)
-        return self._parse_etree(tree.getroot())
+        return self._parse_etree(tree.getroot(), flag)
 
-    def _parse_etree(self, dom):
+    def _parse_etree(self, dom, flag):
         d = {}
         # get our name
         name = get_name(dom)
         # check for whitelist and blacklist
-        if (self.is_whitelist and name not in self.whitelist) or (self.is_blacklist and name in self.blacklist):
-           return d
-        # check for base cases
-        parsed = base_cases.get(dom.tag, lambda _, __: None)(dom, name)
-        if parsed is not None:
-            # we are in base case
-            d.update(parsed)
-            return d
+        if (self.is_whitelist and name in self.whitelist) and not flag:
+           flag = True
+        # if flag is raised, then parse
+        if flag:
+            # check for base cases
+            parsed = base_cases.get(dom.tag, lambda _, __: None)(dom, name)
+            if parsed is not None:
+                # we are in base case
+                d.update(parsed)
+                return d
+        else:
+            # check for base cases, but do not parse
+            if dom.tag in base_cases:
+                return None
         # the rules here are simple: 
         # 1. update d with all the node attributes (except for name)
         for k, v in dom.attrib.items():
@@ -244,13 +242,23 @@ class VaspParser(object):
         kid_names = [get_name(kid) for kid in children]
         # 3. if some of the names are identical, put parsed data in a list (eg, scstep)
         count_kids = Counter(kid_names)
-        d[name] = {kid_name: [] if count_kids[kid_name] > 1 else {} for kid_name in count_kids}
+        d[name] = {}
 
         for (kid_name, kid) in zip(kid_names, children):
-            if count_kids[kid_name] > 1:
-                d[name][kid_name].append(self._parse_etree(kid)[kid_name])
+            result = self._parse_etree(kid, flag)
+            if not result:
+                continue
             else:
+                if count_kids[kid_name] > 1:
+                    kid_list = d[name].get(kid_name, [])
+                    kid_list.append(result[kid_name])
+                    d[name][kid_name] = kid_list
                 # 4. if not, put them in a dict
-                d[name].update(self._parse_etree(kid))
-        return d
+                else:
+                    d[name].update(result)
+        # return something only if we have kids that returned something
+        if d[name]:
+            return d
+        else:
+            return None
 
