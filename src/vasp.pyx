@@ -1,9 +1,10 @@
 # cython: c_string_type=str, c_string_encoding=ascii, profile=True
 
+from __future__ import print_function
 import numpy as np
 from collections import Counter
-#from lxml import etree
 from xml.etree import cElementTree as etree
+from lxml import etree as letree
 
 
 cdef extern from "fast_atoi.h":
@@ -198,9 +199,7 @@ base_cases = {
 
 class VaspParser(object):
     def __init__(self,
-                 recover=True,
                  whitelist=None):
-        self.recover = recover
         self.is_whitelist = False
         self.whitelist = set()
         if whitelist is not None:
@@ -209,8 +208,17 @@ class VaspParser(object):
 
     def parse_file(self, f_name):
         flag = not self.whitelist
-        tree = etree.parse(f_name)
+        tree = self._get_etree(f_name)
         return self._parse_etree(tree.getroot(), flag)
+
+    def _get_etree(self, f_name):
+        try:
+            return letree.parse(f_name)
+        except:
+            parser = letree.XMLParser(recover=True)
+            tree = letree.parse(f_name, parser)
+            print("VaspParser: File {} needed recovery, please check parsing results!".format(f_name))
+            return tree
 
     def _parse_etree(self, dom, flag):
         d = {}
