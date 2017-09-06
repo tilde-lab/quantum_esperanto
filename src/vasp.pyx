@@ -213,7 +213,7 @@ class VaspParser(object):
 
     def _get_etree(self, f_name):
         try:
-            return etree.parse(f_name)
+            return letree.parse(f_name)
         except:
             parser = letree.XMLParser(recover=True)
             tree = letree.parse(f_name, parser)

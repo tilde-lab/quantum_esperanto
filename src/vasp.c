@@ -7552,7 +7552,7 @@ static PyObject *__pyx_pf_4vasp_10VaspParser_2parse_file(CYTHON_UNUSED PyObject 
  * 
  *     def _get_etree(self, f_name):             # <<<<<<<<<<<<<<
  *         try:
- *             return etree.parse(f_name)
+ *             return letree.parse(f_name)
  */
 
 /* Python wrapper */
@@ -7642,7 +7642,7 @@ static PyObject *__pyx_pf_4vasp_10VaspParser_4_get_etree(CYTHON_UNUSED PyObject 
  * 
  *     def _get_etree(self, f_name):
  *         try:             # <<<<<<<<<<<<<<
- *             return etree.parse(f_name)
+ *             return letree.parse(f_name)
  *         except:
  */
   {
@@ -7657,12 +7657,12 @@ static PyObject *__pyx_pf_4vasp_10VaspParser_4_get_etree(CYTHON_UNUSED PyObject 
       /* "vasp.pyx":216
  *     def _get_etree(self, f_name):
  *         try:
- *             return etree.parse(f_name)             # <<<<<<<<<<<<<<
+ *             return letree.parse(f_name)             # <<<<<<<<<<<<<<
  *         except:
  *             parser = letree.XMLParser(recover=True)
  */
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_etree); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 216, __pyx_L3_error)
+      __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_letree); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 216, __pyx_L3_error)
       __Pyx_GOTREF(__pyx_t_5);
       __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_parse_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 216, __pyx_L3_error)
       __Pyx_GOTREF(__pyx_t_6);
@@ -7718,7 +7718,7 @@ static PyObject *__pyx_pf_4vasp_10VaspParser_4_get_etree(CYTHON_UNUSED PyObject 
  * 
  *     def _get_etree(self, f_name):
  *         try:             # <<<<<<<<<<<<<<
- *             return etree.parse(f_name)
+ *             return letree.parse(f_name)
  *         except:
  */
     }
@@ -7731,7 +7731,7 @@ static PyObject *__pyx_pf_4vasp_10VaspParser_4_get_etree(CYTHON_UNUSED PyObject 
 
     /* "vasp.pyx":217
  *         try:
- *             return etree.parse(f_name)
+ *             return letree.parse(f_name)
  *         except:             # <<<<<<<<<<<<<<
  *             parser = letree.XMLParser(recover=True)
  *             tree = letree.parse(f_name, parser)
@@ -7744,7 +7744,7 @@ static PyObject *__pyx_pf_4vasp_10VaspParser_4_get_etree(CYTHON_UNUSED PyObject 
       __Pyx_GOTREF(__pyx_t_7);
 
       /* "vasp.pyx":218
- *             return etree.parse(f_name)
+ *             return letree.parse(f_name)
  *         except:
  *             parser = letree.XMLParser(recover=True)             # <<<<<<<<<<<<<<
  *             tree = letree.parse(f_name, parser)
@@ -7908,7 +7908,7 @@ static PyObject *__pyx_pf_4vasp_10VaspParser_4_get_etree(CYTHON_UNUSED PyObject 
  * 
  *     def _get_etree(self, f_name):
  *         try:             # <<<<<<<<<<<<<<
- *             return etree.parse(f_name)
+ *             return letree.parse(f_name)
  *         except:
  */
     __Pyx_PyThreadState_assign
@@ -7938,7 +7938,7 @@ static PyObject *__pyx_pf_4vasp_10VaspParser_4_get_etree(CYTHON_UNUSED PyObject 
  * 
  *     def _get_etree(self, f_name):             # <<<<<<<<<<<<<<
  *         try:
- *             return etree.parse(f_name)
+ *             return letree.parse(f_name)
  */
 
   /* function exit code */
@@ -24470,7 +24470,7 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *     def _get_etree(self, f_name):             # <<<<<<<<<<<<<<
  *         try:
- *             return etree.parse(f_name)
+ *             return letree.parse(f_name)
  */
   __pyx_tuple__74 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_f_name, __pyx_n_s_parser, __pyx_n_s_tree); if (unlikely(!__pyx_tuple__74)) __PYX_ERR(0, 214, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__74);
@@ -25143,7 +25143,7 @@ PyMODINIT_FUNC PyInit_vasp(void)
  * 
  *     def _get_etree(self, f_name):             # <<<<<<<<<<<<<<
  *         try:
- *             return etree.parse(f_name)
+ *             return letree.parse(f_name)
  */
   __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_4vasp_10VaspParser_5_get_etree, 0, __pyx_n_s_VaspParser__get_etree, NULL, __pyx_n_s_vasp, __pyx_d, ((PyObject *)__pyx_codeobj__29)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 214, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
