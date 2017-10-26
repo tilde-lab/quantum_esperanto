@@ -1,5 +1,10 @@
 # cython: c_string_type=str, c_string_encoding=ascii, profile=True
 
+# Copyright 2017 Andrey Sobolev, Tilde Materials Informatics (Berlin)
+
+# This file is a part of DFTXMLParser project. The project is licensed under the MIT license.
+# See the LICENSE file in the project root for license terms.
+
 from __future__ import print_function
 import numpy as np
 from collections import Counter
