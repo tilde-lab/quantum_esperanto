@@ -4,6 +4,7 @@
 # See the LICENSE file in the project root for license terms.
 
 from setuptools import setup, Extension
+from DFTXMLParser import __version__
 
 # check if we have Cython available
 try:
@@ -30,12 +31,32 @@ if use_cython:
 else:
     exts = [vasp_ext]
 
+with open("README.rst", "r") as f:
+    long_description = f.read()
+
 setup(
     name='DFTXMLParser',
-    version='0.1',
+    version=__version__,
     author='Andrey Sobolev',
+    author_email="andrey.n.sobolev@gmail.com",
+    url="https://github.com/tilde-lab/DFTXMLParser",
     license='MIT',
     description="A fast parser of XML files output by VASP DFT code written in Cython.",
+    long_description=long_description,
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Science/Research',
+        'Topic :: Scientific/Engineering :: Chemistry',
+        'Topic :: Scientific/Engineering :: Physics',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6'
+    ],
     ext_modules=exts,
     packages=['DFTXMLParser'],
     install_requires=['numpy>=1.10', 'lxml'],

@@ -3,5 +3,5 @@
 # This file is a part of DFTXMLParser project. The project is licensed under the MIT license.
 # See the LICENSE file in the project root for license terms.
 
-
+__version__ = "0.1"
 from DFTXMLParser.vasp import VaspParser
