@@ -6,6 +6,7 @@
 # See the LICENSE file in the project root for license terms.
 
 from __future__ import print_function
+import sys
 import numpy as np
 from collections import Counter
 from lxml import etree as letree
@@ -291,11 +292,12 @@ class VaspParser(object):
     def _get_etree(self, f_name):
         try:
             return letree.parse(f_name)
-        except:
+        except letree.XMLSyntaxError as err:
+            print('Error in {}: {}; trying to recover'.format(f_name, str(err)), file=sys.stderr)
             parser = letree.XMLParser(recover=True)
             tree = letree.parse(f_name, parser)
             print("VaspParser: File {} needed recovery, please check parsing results!".format(f_name))
-            return tree
+        return tree
 
     def _parse_etree(self, dom, flag):
         d = {}
