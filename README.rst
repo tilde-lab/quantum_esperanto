@@ -58,7 +58,7 @@ The possible arguments for the parser are:
   first XML error only. When XML recovery is needed, a warning is printed to stderr.
 
 **whitelist**
-  (list, default: *[]*) the list of parent tag names that are only needed to parsed. If empty, then all tags are parsed.
+  (list, default: *None*) the list of parent tag names that are only needed to parsed. If None, then all tags are parsed.
 
 Parsing result
 --------------
@@ -110,7 +110,7 @@ NaNs in case of float values and to MAXINT in case of integer values.
 License
 -------
 
-DFFTXMLParser is licensed under MIT license.
+DFTXMLParser is licensed under MIT license.
 
 .. _GitHub: http://www.github.com/tilde-lab/DFTXMLParser
 .. _pymatgen: https://pymatgen.org

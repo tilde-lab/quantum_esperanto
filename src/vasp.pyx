@@ -8,8 +8,10 @@
 from __future__ import print_function
 import numpy as np
 from collections import Counter
-from xml.etree import cElementTree as etree
 from lxml import etree as letree
+
+
+__all__ = ['VaspParser', ]
 
 
 cdef extern from "fast_atoi.h":
@@ -21,16 +23,19 @@ cdef extern from "fast_atof.h":
 
 
 cdef double to_float(s):
+    """Fast string-to-float conversion"""
     cdef char* f = s
     return fast_atof(f) 
 
 
 cdef int to_int(s):
+    """Fast string-to-int conversion"""
     cdef char* i = s
     return fast_atoi(i)
 
 
 cdef long prod(long[:] mv):
+    """Fast product of array elements"""
     cdef int i, n
     cdef long res = 1
     n = mv.shape[0]
@@ -48,6 +53,12 @@ to_type = {
 
 
 def get_name(el):
+    """
+    Finds a name of a given XML element according to the rules
+
+    :param el: An ElementTree.Element instance
+    :return: A name of the Element
+    """
     if el.tag in ["i", "v", "varray"]:
         return el.attrib.get("name", None)
     else:
@@ -55,21 +66,43 @@ def get_name(el):
 
 
 def parse_i(el, name):
+    """
+    Parses the single value Element (i tag)
+
+    :param el: An ElementTree.Element instance
+    :param name: A name of the Element
+    :return: A dictionary with parsing results
+    """
     e_type = el.attrib.get("type", None)
     value = to_type[e_type](el.text)
     return {name: value}
 
 
 def parse_v(el, name):
+    """
+    Parses the vector Element (v tag)
+
+    :param el: An ElementTree.Element instance
+    :param name: A name of the Element
+    :return: A dictionary with parsing results
+    """
     e_type = el.attrib.get("type", None)
     value = [to_type[e_type](v_i) for v_i in el.text.split()]
     return {name: value}
 
 
 def parse_varray(el, name):
+    """
+    Parses the 2D array Element (varray tag)
+
+    :param el: An ElementTree.Element instance
+    :param name: A name of the Element
+    :return: A dictionary with parsing results
+    """
+
     e_type = el.attrib.get("type", None)
     if e_type is not None:
-        return parse_general_varray(el, name)
+        return _parse_general_varray(el, name)
     else:
         # fast parsing of float varray
         dims = np.array([len(el), len(el[0].text.split())])
@@ -80,7 +113,7 @@ def parse_varray(el, name):
         return {name: value.reshape(dims)}
 
 
-def parse_general_varray(el, name):
+def _parse_general_varray(el, name):
     value = []
     for kid in el:
         parsed_kid = parse_v(kid, None)
@@ -99,6 +132,14 @@ cdef void parse_float_varray(el, double[:] value, long[:] dims, long[:] cols):
 
 
 def parse_array(el, name):
+    """
+    Parses the array Element with fields and sets of values (array tag)
+
+    :param el: An ElementTree.Element instance
+    :param name: A name of the Element
+    :return: A dictionary containing dimensions, field names and sets od values in Numpy arrsya
+    """
+
     # array has dimensions, field names and sets of values
     dims = []
     fields = []
@@ -180,11 +221,18 @@ def parse_general_set(el, types, ifields):
 
 
 def parse_time(el, name):
+    """
+    Parses time Element
+
+    :param el: An ElementTree.Element instance
+    :param name: A name of the Element
+    :return: a dictionary with parsing results
+    """
     value = [float(t) for t in [el.text[:8], el.text[8:]]]
     return {name: value}
 
 
-def parse_entry(e_type):
+def _parse_entry(e_type):
     def _parse(el, name):
         return {name: to_type[e_type](el.text)}
     return _parse
@@ -196,15 +244,33 @@ base_cases = {
     "varray": parse_varray,
     "array": parse_array,
     "time": parse_time,
-    "atoms": parse_entry("int"),
-    "types": parse_entry("int"),
+    "atoms": _parse_entry("int"),
+    "types": _parse_entry("int"),
 }
 
 
-
 class VaspParser(object):
-    def __init__(self,
-                 whitelist=None):
+
+    def __init__(self, whitelist=None):
+        """
+        VaspParser is is a fast parser of XML files output by DFT codes (*vasp* as of now) written in Cython.
+        It takes advantage of lxml, a Python wrapper around libxml2 library, and its Cython interface.
+        XML files are parsed to a Python dictionary in a transparent way. It is really fast, up to 10 times faster than
+        the parser used by pymatgen project.
+
+        The parser can be used in a very simple way. First, the parser has to be instantiated, and then the
+        ``parse_file`` method of the parser returns the dictionary of parsed values
+
+        The result of parsing is a dictionary that follows the structure of ``vasprun.xml``. The keys of the dictionary
+        are either tag names (for ``i``, ``v``, ``varray`` tags), or ``tag:tag name`` construction (for tags that do
+        have name attribute), or just tags themselves. The values are either tag contents converted to the right type
+        (specified by ``type`` tag attribute) or (in case of varrays and sets) Numpy arrays.
+
+        Fortran overflows (denoted by `*****`) are converted to NaNs in case of float values and to MAXINT in
+        case of integer values.
+
+        :param whitelist: a list of XML tags to parse; default behaviour is to parse all tags in the file
+        """
         self.is_whitelist = False
         self.whitelist = set()
         if whitelist is not None:
@@ -212,6 +278,12 @@ class VaspParser(object):
             self.whitelist = set(whitelist)
 
     def parse_file(self, f_name):
+        """
+        The main method of the parser. Parses the file with the given name
+
+        :param f_name: the name of file to parse
+        :return: The dictionary od parsed values
+        """
         flag = not self.whitelist
         tree = self._get_etree(f_name)
         return self._parse_etree(tree.getroot(), flag)
