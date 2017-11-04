@@ -1,8 +1,8 @@
-============
-DFTXMLParser
-============
+=================
+Quantum Esperanto
+=================
 
-DFTXMLParser is a fast parser of XML files output by DFT codes (*vasp* as of now) written in Cython.
+*Quantum Esperanto* is a fast parser of XML files output by DFT codes (*vasp* as of now) written in Cython.
 It takes advantage of lxml, a Python wrapper around libxml2 library, and its Cython interface.
 XML files are parsed to a Python dictionary in a transparent way. It is really fast, up to 10 times faster than the
 parser used by pymatgen_ project.
@@ -10,12 +10,12 @@ parser used by pymatgen_ project.
 Installation
 ------------
 
-As DFTXMLParser is not yet on PyPI, it can be installed from GitHub_:
+As Quantum Esperanto is not yet on PyPI, it can be installed from GitHub_:
 
 ::
 
-  $ git clone https://github.com/tilde-lab/DFTXMLParser
-  $ cd DFTXMLParser
+  $ git clone https://github.com/tilde-lab/quantum_esperanto
+  $ cd quantum_esperanto
   $ pip install .
 
 The Python prerequisites for the package are ``numpy`` and ``lxml`` (should be installed automatically with ``pip``).
@@ -26,11 +26,11 @@ To do it issue the following command after cloning the repository and changing t
 
 ::
 
-  $ cd DFTXMLParser
+  $ cd quantum_esperanto
   $ pip install -e .[dev]
 
 After install it is possible to run several tests to check if the installation was completed successfully. It can be
-done with the following commands in DFTXMLParser directory:
+done with the following commands in ``quantum_esperanto`` directory:
 
 ::
 
@@ -46,7 +46,7 @@ method of the parser returns the dictionary of parsed values:
 
 .. code:: python
 
-  from DFTXMLParser.vasp import VaspParser
+  from quantum_esperanto.vasp import VaspParser
   parser = VaspParser()
   d = parser.parse_file('vasprun.xml')
 
@@ -110,7 +110,7 @@ NaNs in case of float values and to MAXINT in case of integer values.
 License
 -------
 
-DFTXMLParser is licensed under MIT license.
+Quantum Esperanto is licensed under MIT license.
 
-.. _GitHub: http://www.github.com/tilde-lab/DFTXMLParser
+.. _GitHub: http://www.github.com/tilde-lab/quantum_esperanto
 .. _pymatgen: https://pymatgen.org

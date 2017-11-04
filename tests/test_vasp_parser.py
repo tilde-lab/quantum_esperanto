@@ -1,6 +1,6 @@
 # Copyright 2017 Andrey Sobolev, Tilde Materials Informatics (Berlin)
 
-# This file is a part of DFTXMLParser project. The project is licensed under the MIT license.
+# This file is a part of quantum_esperanto project. The project is licensed under the MIT license.
 # See the LICENSE file in the project root for license terms.
 
 """
@@ -13,7 +13,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 from nose.tools import ok_, eq_
 from reference.vasp_parser_py import parse_file as parse_file_ref
-from DFTXMLParser.vasp import VaspParser
+from quantum_esperanto.vasp import VaspParser
 
 # float tolerance
 tol = 1e-7

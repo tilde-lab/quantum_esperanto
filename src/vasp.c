@@ -10,14 +10,14 @@
         "include_dirs": [
             "include"
         ], 
-        "name": "DFTXMLParser.vasp", 
+        "name": "quantum_esperanto.vasp", 
         "sources": [
             "src/vasp.pyx", 
             "src/fast_atoi.c", 
             "src/fast_atof.c"
         ]
     }, 
-    "module_name": "DFTXMLParser.vasp"
+    "module_name": "quantum_esperanto.vasp"
 }
 END: Cython Metadata */
 
