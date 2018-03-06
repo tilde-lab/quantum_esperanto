@@ -16,11 +16,11 @@ parser used by pymatgen_ project.
 Installation
 ------------
 
-The development versions of libraries ``libxml2`` and ``libxslt`` must be present in the system. Check with:
+The development versions of libraries ``libxml2`` and ``libxslt`` must be present in the system. Check with the command:
 
 ::
 
-  xslt-config
+  $ xslt-config
 
 Also, C compiler such as ``gcc`` must be present. The recommended way of installing Quantum Esperanto is with ``pip`` from PyPI:
 
