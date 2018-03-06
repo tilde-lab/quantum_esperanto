@@ -9,20 +9,26 @@ Quantum Esperanto
 
 
 *Quantum Esperanto* is a fast parser of XML files output by DFT codes (*vasp* as of now) written in Cython.
-It takes advantage of lxml, a Python wrapper around libxml2 library, and its Cython interface.
+It takes advantage of lxml, a Python wrapper around ``libxml2`` library, and its Cython interface.
 XML files are parsed to a Python dictionary in a transparent way. It is really fast, up to 10 times faster than the
 parser used by pymatgen_ project.
 
 Installation
 ------------
 
-The recommended way of installing Quantum Esperanto is with ``pip`` from PyPI:
+The development versions of libraries ``libxml2`` and ``libxslt`` must be present in the system. Check with:
+
+::
+
+  xslt-config
+
+Also, C compiler such as ``gcc`` must be present. The recommended way of installing Quantum Esperanto is with ``pip`` from PyPI:
 
 ::
 
   $ pip install quantum_esperanto
 
-However, if one is interested in obtaining latest versions of the package, it can be installed using the source
+If one is interested in obtaining latest versions of the package, it can be installed using the source
 code from GitHub_:
 
 ::
@@ -32,7 +38,6 @@ code from GitHub_:
   $ pip install .
 
 The Python prerequisites for the package are ``numpy`` and ``lxml`` (should be installed automatically with ``pip``).
-Also, C compiler such as ``gcc`` must be present in the system.
 
 It is possible to install the package in development mode. This will install ``Cython`` as well as ``nose`` test suite.
 To do it issue the following command after cloning the repository and changing the directory:
