@@ -3,4 +3,4 @@
 # This file is a part of quantum_esperanto project. The project is licensed under the MIT license.
 # See the LICENSE file in the project root for license terms.
 
-__version__ = "0.2"
+__version__ = "0.3"
