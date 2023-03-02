@@ -1,70 +1,64 @@
-=================
-Quantum Esperanto
-=================
+# Quantum Esperanto
 
 [![DOI](https://zenodo.org/badge/99029873.svg)](https://doi.org/10.5281/zenodo.7693601)
 [![PyPI](https://img.shields.io/pypi/v/quantum_esperanto.svg?style=flat)](https://pypi.org/project/quantum_esperanto)
 [![Build Status](https://travis-ci.org/tilde-lab/quantum_esperanto.svg?branch=master)](https://travis-ci.org/tilde-lab/quantum_esperanto)
 
-*Quantum Esperanto* is a fast parser of XML files output by DFT codes (*vasp* as of now) written in Cython.
-It takes advantage of lxml, a Python wrapper around ``libxml2`` library, and its Cython interface.
+*Quantum Esperanto* is a fast parser of XML files output by DFT codes (such as VASP) written in Cython.
+It takes advantage of lxml, a Python wrapper around `libxml2` library, and its Cython interface.
 XML files are parsed to a Python dictionary in a transparent way. It is really fast, up to 10 times faster than the
-parser used by pymatgen_ project.
+parser used by pymatgen project.
 
-Installation
-------------
+## Installation
 
-The development versions of libraries ``libxml2`` and ``libxslt`` must be present in the system. Check with the command:
+The development versions of libraries `libxml2` and `libxslt` must be present in the system. Check with the command:
 
-::
-
+```
   $ xslt-config
+```
 
-Also, C compiler such as ``gcc`` must be present. The recommended way of installing Quantum Esperanto is with ``pip`` from PyPI:
+Also, a C-compiler such as `gcc` must be present. The recommended way of installing Quantum Esperanto is with `pip` from PyPI:
 
-::
-
+```
   $ pip install quantum_esperanto
+```
 
-If one is interested in obtaining latest versions of the package, it can be installed using the source
-code from GitHub_:
+If one is interested in obtaining latest versions of the package, it can be installed using the source code from GitHub:
 
-::
-
+```
   $ git clone https://github.com/tilde-lab/quantum_esperanto
   $ cd quantum_esperanto
   $ pip install .
+```
 
-The Python prerequisites for the package are ``numpy`` and ``lxml`` (should be installed automatically with ``pip``).
-
-It is possible to install the package in development mode. This will install ``Cython`` as well as ``nose`` test suite.
+The Python prerequisites for the package are `numpy` and `lxml` (should be installed automatically with `pip`).
+It is possible to install the package in development mode. This will install `Cython` as well as `nose` test suite.
 To do it issue the following command after cloning the repository and changing the directory:
 
-::
-
+```
   $ cd quantum_esperanto
   $ pip install -e .[dev]
+```
 
-After install it is possible to run several tests to check if the installation was completed successfully. It can be
-done with the following commands in ``quantum_esperanto`` directory:
+After installation run several tests to check if the procedure was completed successfully. It can be
+done with the following commands in `quantum_esperanto` directory:
 
-::
-
+```
   $ python setup.py test
+```
 
 If everything is OK, you're all set to start using the package.
 
-Usage
------
+## Usage
 
-The parser can be used in a very simple way. First, the parser has to be instantiated, and then the ``parse_file``
+The parser can be used in a very simple way. First, the parser has to be instantiated, and then the `parse_file`
 method of the parser returns the dictionary of parsed values:
 
-.. code:: python
-
+```
   from quantum_esperanto.vasp import VaspParser
   parser = VaspParser()
   d = parser.parse_file('vasprun.xml')
+```
 
 The possible arguments for the parser are:
 
@@ -76,21 +70,17 @@ The possible arguments for the parser are:
 **whitelist**
   (list, default: *None*) the list of parent tag names that are only needed to parsed. If None, then all tags are parsed.
 
-Parsing result
---------------
+### Parsing result
 
-The result of parsing is a dictionary that follows the structure of ``vasprun.xml``. The keys of the dictionary are
-either tag names (for ``i``, ``v``, ``varray`` tags), or ``tag:tag name`` construction (for tags that do have name
-attribute), or just tags themselves. The values are either tag contents converted to the right type (specified by ``type``
+The result of parsing is a dictionary that follows the structure of `vasprun.xml`. The keys of the dictionary are
+either tag names (for `i`, `v`, `varray` tags), or `tag:tag name` construction (for tags that do have name
+attribute), or just tags themselves. The values are either tag contents converted to the right type (specified by `type`
 tag attribute) or (in case of varrays and sets) Numpy arrays. Fortran overflows (denoted by `*****`) are converted to
 NaNs in case of float values and to MAXINT in case of integer values.
 
-**Example**:
+### Example
 
-*xml file*
-
-.. code:: xml
-
+```xml
  <structure name="primitive_cell" >
   <crystal>
    <varray name="basis" >
@@ -109,11 +99,11 @@ NaNs in case of float values and to MAXINT in case of integer values.
    <v>       0.00000000       0.00000000       0.00000000 </v>
   </varray>
  </structure>
+```
 
-*resulting dictionary* (printed with *pprint*):
+The *resulting dictionary* reads (printed with *pprint*):
 
-.. code:: python
-
+```
   {'structure:primitive_cell': {'crystal': {'basis': array([[ 1.433,  1.433,  1.433],
                                                             [ 1.433, -1.433, -1.433],
                                                             [-1.433,  1.433, -1.433]]),
@@ -122,11 +112,8 @@ NaNs in case of float values and to MAXINT in case of integer values.
                                                                 [-0.        ,  0.34891835, -0.34891835]]),
                                             'volume': 11.77059895},
                                 'positions': array([[ 0.,  0.,  0.]])}}
+```
 
-License
--------
+## License
 
-Quantum Esperanto is licensed under MIT license.
-
-.. _GitHub: http://www.github.com/tilde-lab/quantum_esperanto
-.. _pymatgen: https://pymatgen.org
+MIT &copy; Andrey Sobolev, Tilde Materials Informatics
