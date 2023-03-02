@@ -2,11 +2,9 @@
 Quantum Esperanto
 =================
 
-.. image:: https://travis-ci.org/tilde-lab/quantum_esperanto.svg?branch=master
-    :target: https://travis-ci.org/tilde-lab/quantum_esperanto
-.. image:: https://badge.fury.io/py/quantum_esperanto.svg
-    :target: https://badge.fury.io/py/quantum_esperanto
-
+[![DOI](https://zenodo.org/badge/99029873.svg)](https://doi.org/10.5281/zenodo.7693601)
+[![PyPI](https://img.shields.io/pypi/v/quantum_esperanto.svg?style=flat)](https://pypi.org/project/quantum_esperanto)
+[![Build Status](https://travis-ci.org/tilde-lab/quantum_esperanto.svg?branch=master)](https://travis-ci.org/tilde-lab/quantum_esperanto)
 
 *Quantum Esperanto* is a fast parser of XML files output by DFT codes (*vasp* as of now) written in Cython.
 It takes advantage of lxml, a Python wrapper around ``libxml2`` library, and its Cython interface.
