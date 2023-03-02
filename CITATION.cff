@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+title: quantum_esperanto
+type: software
+license: MIT
+authors:
+  - given-names: Andrey
+    family-names: Sobolev
+    orcid: 'https://orcid.org/0000-0001-5086-6601'
+  - given-names: Evgeny
+    family-names: Blokhin
+    orcid: 'https://orcid.org/0000-0002-5333-3947'
+doi: 10.5281/zenodo.7693601
+url: 'https://github.com/tilde-lab/quantum_esperanto'
+repository-artifact: 'https://pypi.org/project/quantum_esperanto'
+keywords:
+  - crystal structure
+  - VASP
+  - Vienna Ab initio Simulation Package
+  - first-principles
+  - crystallography
+  - computational chemistry
+  - materials science
+  - atomistic simulations
+  - computational materials
