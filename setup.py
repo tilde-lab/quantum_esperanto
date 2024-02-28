@@ -31,7 +31,7 @@ if use_cython:
 else:
     exts = [vasp_ext]
 
-with open("README.rst", "r") as f:
+with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(
